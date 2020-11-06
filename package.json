@@ -1,0 +1,41 @@
+{
+  "name": "express-graphql-boilerplate",
+  "version": "1.0.0",
+  "description": "A boilerplate template for express-graphql server",
+  "main": "index.js",
+  "scripts": {
+    "dev": "eval $(cat .env) nodemon -r esm",
+    "start": "NODE_ENV=production node -r esm"
+  },
+  "keywords": [
+    "Express",
+    "GraphQL",
+    "Apollo",
+    "Node"
+  ],
+  "author": "Ashiru Olawale",
+  "license": "ISC",
+  "dependencies": {
+    "@hapi/joi": "^17.1.1",
+    "apollo-server-express": "^2.19.0",
+    "bcrypt": "^5.0.0",
+    "consola": "^2.15.0",
+    "esm": "^3.2.25",
+    "express": "^4.17.1",
+    "jsonwebtoken": "^8.5.1",
+    "mongoose": "^5.10.13"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.6"
+  },
+  "engines": {
+    "node": ">= 12.x.x"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/walebant/apollo-express-graphql-boilerplate.git"
+  },
+  "bugs": {
+    "url": "https://github.com/walebant/apollo-express-graphql-boilerplate/issues"
+  }
+}
