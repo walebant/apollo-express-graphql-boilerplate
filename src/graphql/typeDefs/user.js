@@ -26,13 +26,19 @@ export default gql`
     createdAt: String!
     updatedAt: String!
   }
-  type Tokens {
-    access: String!
-    refresh: String!
-  }
 
   type Auth {
     user: User
-    tokens: Tokens!
+    tokens: AuthTokens!
+  }
+
+  type AuthTokens {
+    access: Token!
+    refresh: Token!
+  }
+
+  type Token {
+    token: String!
+    expires: String!
   }
 `;

@@ -1,5 +1,6 @@
 import { Schema, model } from 'mongoose';
 import { toJSON, paginate } from './plugins';
+import { roles } from '../config/roles';
 
 const UserSchema = new Schema(
   {
@@ -29,8 +30,12 @@ const UserSchema = new Schema(
     },
     role: {
       type: String,
-      enum: ['user', 'admin'],
+      enum: roles,
       default: 'user',
+    },
+    tokens: {
+      access: { token: { type: String }, expires: { type: String } },
+      refresh: { token: { type: String }, expires: { type: String } },
     },
   },
   {
@@ -42,6 +47,6 @@ const UserSchema = new Schema(
 UserSchema.plugin(toJSON);
 UserSchema.plugin(paginate);
 
-const User = model('users', UserSchema);
+const User = model('User', UserSchema);
 
 export default User;

@@ -34,13 +34,24 @@ export default {
     refreshTokens: async (_, _args, { req }) => {
       try {
         const authUser = await getRefreshToken(req);
-        console.log(authUser);
         // Issues Authentication Token
         const tokens = await issueToken(authUser);
         return {
           user: authUser,
           tokens,
         };
+      } catch (error) {
+        throw new SERVER_ERROR(error.message);
+      }
+    },
+    logout: async (_, _args, { req }) => {
+      const authUser = await getUser(req);
+      try {
+        // Blacklist Authentication Token
+        authUser.tokens.blacklisted = true;
+        await authUser.save();
+
+        return 'Log out success';
       } catch (error) {
         throw new SERVER_ERROR(error.message);
       }
@@ -61,6 +72,9 @@ export default {
 
         // Issues Authentication Token
         const tokens = await issueToken(user);
+
+        user.tokens = tokens;
+        await user.save();
 
         return {
           user,
@@ -92,10 +106,11 @@ export default {
         // hash the password
         user.password = await hashPassword(password);
 
-        const result = await user.save();
-
         // Issues Authentication Token
         const tokens = await issueToken(user);
+
+        user.tokens = tokens;
+        const result = await user.save();
 
         return {
           user: result,

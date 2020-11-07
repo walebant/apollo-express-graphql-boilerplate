@@ -1,4 +1,5 @@
 import { sign, verify } from 'jsonwebtoken';
+import jwtDecode from 'jwt-decode';
 import { hash, compare } from 'bcryptjs';
 import { ApolloError, AuthenticationError } from 'apollo-server-express';
 import { NOT_FOUND_ERROR, UNAUTHORIZED_ERROR } from '../utils/errors';
@@ -11,20 +12,31 @@ import {
 import { User } from '../models';
 
 export const issueToken = async ({ id, name, username, email }) => {
-  const access = await sign({ id, name, username, email }, JWT_ACCESS_SECRET, {
-    expiresIn: JWT_ACCESS_EXPIRATION_MINUTES,
-  });
-  const refresh = await sign(
+  const accessToken = await sign(
+    { id, name, username, email },
+    JWT_ACCESS_SECRET,
+    {
+      expiresIn: JWT_ACCESS_EXPIRATION_MINUTES,
+    }
+  );
+  const refreshToken = await sign(
     { id, name, username, email },
     JWT_REFRESH_SECRET,
     {
       expiresIn: JWT_REFRESH_EXPIRATION_DAYS,
     }
   );
+
   // `Bearer ${token}`;
   return {
-    access,
-    refresh,
+    access: {
+      token: accessToken,
+      expires: jwtDecode(accessToken).exp,
+    },
+    refresh: {
+      token: refreshToken,
+      expires: jwtDecode(refreshToken).exp,
+    },
   };
 };
 
