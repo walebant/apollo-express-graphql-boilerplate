@@ -46,19 +46,25 @@ export const hashPassword = async password =>
 export const comparePassword = async (providedPassword, serverPassword) =>
   compare(providedPassword, serverPassword);
 
-export const getUser = async req => {
-  const token = req.headers.authorization || '';
+export const getUser = async (req, requiresAuth = true) => {
+  const header = req.headers.authorization || '';
 
-  const decodedToken = verify(token, JWT_ACCESS_SECRET);
+  if (header) {
+    const token = verify(header, JWT_ACCESS_SECRET);
+    // try to retrieve a user with the token
+    const authUser = await User.findById(token.id);
 
-  if (!decodedToken)
-    throw new AuthenticationError('User authentication failed. Please login.');
+    if (!authUser)
+      throw new AuthenticationError(
+        'Invalid token. User authentication failed.'
+      );
 
-  // try to retrieve a user with the token
-  const authUser = await User.findById(decodedToken.id);
+    if (requiresAuth) {
+      return authUser;
+    }
 
-  if (!authUser) throw new NOT_FOUND_ERROR('User not found!');
-  return authUser;
+    return null;
+  }
 };
 
 export const getRefreshToken = async req => {

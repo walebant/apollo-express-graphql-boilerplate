@@ -45,7 +45,7 @@ export default {
       }
     },
     logout: async (_, _args, { req }) => {
-      const authUser = await getUser(req);
+      const authUser = await getUser(req, false);
       try {
         // Blacklist Authentication Token
         authUser.tokens.blacklisted = true;
