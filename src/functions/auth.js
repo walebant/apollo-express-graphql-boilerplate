@@ -48,3 +48,18 @@ export const getUser = async req => {
   if (!authUser) throw new NOT_FOUND_ERROR('User not found!');
   return authUser;
 };
+
+export const getRefreshToken = async req => {
+  const token = req.headers.refresh_token || '';
+
+  const decodedToken = verify(token, JWT_REFRESH_SECRET);
+
+  if (!decodedToken)
+    throw new AuthenticationError('User authentication failed. Please login.');
+
+  // try to retrieve a user with the token
+  const authUser = await User.findById(decodedToken.id);
+
+  if (!authUser) throw new NOT_FOUND_ERROR('User not found!');
+  return authUser;
+};

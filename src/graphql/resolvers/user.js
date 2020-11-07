@@ -4,6 +4,7 @@ import {
   hashPassword,
   comparePassword,
   getUser,
+  getRefreshToken,
 } from '../../functions/auth';
 import {
   UserRegisterationRules,
@@ -19,8 +20,8 @@ import {
 export default {
   Query: {
     profile: async (_, _args, { req }) => {
-      const user = await getUser(req);
-      return user;
+      const authUser = await getUser(req);
+      return authUser;
     },
     users: async () => {
       try {
@@ -30,8 +31,20 @@ export default {
         throw new SERVER_ERROR(error.message);
       }
     },
-    token: () => {},
-    refreshToken: () => {},
+    refreshToken: async (_, _args, { req }) => {
+      try {
+        const authUser = await getRefreshToken(req);
+        console.log(authUser);
+        // Issues Authentication Token
+        const tokens = await issueToken(authUser);
+        return {
+          user: authUser,
+          ...tokens,
+        };
+      } catch (error) {
+        throw new SERVER_ERROR(error.message);
+      }
+    },
     login: async (_, args) => {
       // Validate user data
       await UserAuthenticationRules.validate(args, {
