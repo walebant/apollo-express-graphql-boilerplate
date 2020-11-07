@@ -4,7 +4,7 @@ export default gql`
   extend type Query {
     profile: User!
     users: [User!]!
-    refreshToken: Auth!
+    refreshTokens: Auth!
     login(username: String!, password: String!): Auth!
   }
 
@@ -22,13 +22,17 @@ export default gql`
     name: String!
     username: String!
     email: String!
+    role: String!
     createdAt: String!
     updatedAt: String!
+  }
+  type Tokens {
+    access: String!
+    refresh: String!
   }
 
   type Auth {
     user: User
-    token: String!
-    refreshToken: String!
+    tokens: Tokens!
   }
 `;

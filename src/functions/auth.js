@@ -3,7 +3,7 @@ import { hash, compare } from 'bcryptjs';
 import { ApolloError, AuthenticationError } from 'apollo-server-express';
 import { NOT_FOUND_ERROR, UNAUTHORIZED_ERROR } from '../utils/errors';
 import {
-  JWT_SECRET,
+  JWT_ACCESS_SECRET,
   JWT_REFRESH_SECRET,
   JWT_ACCESS_EXPIRATION_MINUTES,
   JWT_REFRESH_EXPIRATION_DAYS,
@@ -11,10 +11,10 @@ import {
 import { User } from '../models';
 
 export const issueToken = async ({ id, name, username, email }) => {
-  const token = await sign({ id, name, username, email }, JWT_SECRET, {
+  const access = await sign({ id, name, username, email }, JWT_ACCESS_SECRET, {
     expiresIn: JWT_ACCESS_EXPIRATION_MINUTES,
   });
-  const refreshToken = await sign(
+  const refresh = await sign(
     { id, name, username, email },
     JWT_REFRESH_SECRET,
     {
@@ -23,8 +23,8 @@ export const issueToken = async ({ id, name, username, email }) => {
   );
   // `Bearer ${token}`;
   return {
-    token,
-    refreshToken,
+    access,
+    refresh,
   };
 };
 
@@ -37,7 +37,7 @@ export const comparePassword = async (providedPassword, serverPassword) =>
 export const getUser = async req => {
   const token = req.headers.authorization || '';
 
-  const decodedToken = verify(token, JWT_SECRET);
+  const decodedToken = verify(token, JWT_ACCESS_SECRET);
 
   if (!decodedToken)
     throw new AuthenticationError('User authentication failed. Please login.');

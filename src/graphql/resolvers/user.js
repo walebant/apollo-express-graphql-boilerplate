@@ -31,7 +31,7 @@ export default {
         throw new SERVER_ERROR(error.message);
       }
     },
-    refreshToken: async (_, _args, { req }) => {
+    refreshTokens: async (_, _args, { req }) => {
       try {
         const authUser = await getRefreshToken(req);
         console.log(authUser);
@@ -39,7 +39,7 @@ export default {
         const tokens = await issueToken(authUser);
         return {
           user: authUser,
-          ...tokens,
+          tokens,
         };
       } catch (error) {
         throw new SERVER_ERROR(error.message);
@@ -64,7 +64,7 @@ export default {
 
         return {
           user,
-          ...tokens,
+          tokens,
         };
       } catch (error) {
         throw new SERVER_ERROR(error.message);
@@ -99,7 +99,7 @@ export default {
 
         return {
           user: result,
-          ...tokens,
+          tokens,
         };
       } catch (error) {
         throw new SERVER_ERROR(error.message);

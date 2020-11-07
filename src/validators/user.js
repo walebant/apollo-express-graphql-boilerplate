@@ -25,11 +25,14 @@ const password = yup
   .min(6, 'Password should have at least 6 characters.')
   .max(10, 'Password should have at most 10 characters.');
 
+const role = yup.mixed().oneOf(['user', 'admin']);
+
 export const UserRegisterationRules = yup.object().shape({
   name,
   username,
   password,
   email,
+  role,
 });
 
 export const UserAuthenticationRules = yup.object().shape({
