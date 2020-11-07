@@ -39,6 +39,7 @@ const connect = async () => {
       message: `Successfully connect to MONGO_DB \n${DB_URI}`,
     });
 
+    server.applyMiddleware({ app, cors: false });
     app.listen(PORT, () =>
       success({
         badge: true,

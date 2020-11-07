@@ -1,4 +1,5 @@
 import { Schema, model } from 'mongoose';
+import { toJSON, paginate } from './plugins';
 
 const UserSchema = new Schema(
   {
@@ -30,6 +31,10 @@ const UserSchema = new Schema(
     timestamps: true,
   }
 );
+
+// add plugin that converts mongoose to json
+UserSchema.plugin(toJSON);
+UserSchema.plugin(paginate);
 
 const User = model('users', UserSchema);
 
