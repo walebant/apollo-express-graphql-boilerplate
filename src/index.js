@@ -6,6 +6,7 @@ import { ApolloServer } from 'apollo-server-express';
 import { PORT, DB_URI, IN_PROD } from './config';
 import typeDefs from './graphql/typeDefs';
 import resolvers from './graphql/resolvers';
+import { getUser } from './functions/auth';
 
 // Initialize the app
 const app = express();
@@ -17,6 +18,7 @@ app.use(cors());
 const server = new ApolloServer({
   typeDefs,
   resolvers,
+  context: async ({ req }) => ({ req }),
   playground: IN_PROD
     ? false
     : {
@@ -34,22 +36,18 @@ const connect = async () => {
       useNewUrlParser: true,
       useUnifiedTopology: true,
     });
-    success({
-      badge: true,
-      message: `Successfully connect to MONGO_DB \n${DB_URI}`,
-    });
 
     server.applyMiddleware({ app, cors: false });
     app.listen(PORT, () =>
       success({
         badge: true,
-        message: `Successfully connect to MONGO_DB \n${DB_URI}`,
+        message: `Apollo server started on \nhttp://localhost:/${PORT}${server.graphqlPath}`,
       })
     );
 
     success({
       badge: true,
-      message: `Apollo server started on \nhttp://localhost:/${PORT}${server.graphqlPath}`,
+      message: `Successfully connected to MONGO_DB \n${DB_URI}`,
     });
   } catch (err) {
     error({

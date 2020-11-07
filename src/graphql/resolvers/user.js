@@ -1,28 +1,71 @@
-import { hash } from 'bcryptjs';
 import { User } from '../../models';
-import { issueToken } from '../../functions/auth';
+import {
+  issueToken,
+  hashPassword,
+  comparePassword,
+  getUser,
+} from '../../functions/auth';
 import {
   UserRegisterationRules,
   UserAuthenticationRules,
 } from '../../validators';
-import { BAD_REQUEST_ERROR, SERVER_ERROR } from '../../utils/errors';
+import {
+  NOT_FOUND_ERROR,
+  BAD_REQUEST_ERROR,
+  UNAUTHORIZED_ERROR,
+  SERVER_ERROR,
+} from '../../utils/errors';
 
 export default {
   Query: {
-    profile: () => {},
-    users: () => {},
+    profile: async (_, _args, { req }) => {
+      const user = await getUser(req);
+      return user;
+    },
+    users: async () => {
+      try {
+        const users = await User.find();
+        return users;
+      } catch (error) {
+        throw new SERVER_ERROR(error.message);
+      }
+    },
     token: () => {},
     refreshToken: () => {},
-    login: () => {},
+    login: async (_, args) => {
+      // Validate user data
+      await UserAuthenticationRules.validate(args, {
+        abortEarly: true,
+      });
+      try {
+        // Check if user is registered
+        const user = await User.findOne({ username: args.username });
+        if (!user) throw new NOT_FOUND_ERROR('User not found.');
+
+        // Compare password
+        const isMatch = await comparePassword(args.password, user.password);
+        if (!isMatch) throw new BAD_REQUEST_ERROR('Invalid password.');
+
+        // Issues Authentication Token
+        const tokens = await issueToken(user);
+
+        return {
+          user,
+          ...tokens,
+        };
+      } catch (error) {
+        throw new SERVER_ERROR(error.message);
+      }
+    },
   },
   Mutation: {
-    register: async (_, newUser) => {
+    register: async (_, args) => {
       // Validate user data
-      await UserRegisterationRules.validate(newUser, {
+      await UserRegisterationRules.validate(args, {
         abortEarly: true,
       });
 
-      const { username, email, password } = newUser;
+      const { username, email, password } = args;
 
       try {
         let user;
@@ -32,9 +75,9 @@ export default {
         user = await User.findOne({ email });
         if (user) throw new BAD_REQUEST_ERROR('Email is already taken.');
 
-        user = new User(newUser);
+        user = new User(args);
         // hash the password
-        user.password = await hash(password, 10);
+        user.password = await hashPassword(password);
 
         const result = await user.save();
 
@@ -45,8 +88,8 @@ export default {
           user: result,
           ...tokens,
         };
-      } catch (err) {
-        throw new SERVER_ERROR(err.message);
+      } catch (error) {
+        throw new SERVER_ERROR(error.message);
       }
     },
   },

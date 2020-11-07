@@ -1,4 +1,4 @@
-import { ApolloError } from 'apollo-server-express';
+import { ApolloError, AuthenticationError } from 'apollo-server-express';
 
 export class BAD_REQUEST_ERROR extends ApolloError {
   constructor(message, statusCode) {
@@ -7,7 +7,7 @@ export class BAD_REQUEST_ERROR extends ApolloError {
   }
 }
 
-export class UNAUTHORIZED_ERROR extends ApolloError {
+export class UNAUTHORIZED_ERROR extends AuthenticationError {
   constructor(message, statusCode) {
     super(message, statusCode);
     this.statusCode = 401;
