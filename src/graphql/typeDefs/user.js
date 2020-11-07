@@ -6,6 +6,7 @@ export default gql`
     users: [User!]!
     refreshTokens: Auth!
     login(username: String!, password: String!): Auth!
+    logout: String!
   }
 
   extend type Mutation {
