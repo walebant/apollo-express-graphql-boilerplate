@@ -28,8 +28,8 @@ const password = yup
 const role = yup.mixed().oneOf(['user', 'admin']);
 
 const tokens = yup.object({
-  access: yup.object({ token: yup.string(), expires: yup.string() }),
-  refresh: yup.object({ token: yup.string(), expires: yup.string() }),
+  access: yup.string(),
+  refresh: yup.string(),
 });
 
 export const UserRegisterationRules = yup.object().shape({

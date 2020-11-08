@@ -3,7 +3,6 @@ import {
   issueToken,
   hashPassword,
   comparePassword,
-  getUser,
   getRefreshToken,
 } from '../../functions/auth';
 import {
@@ -20,8 +19,11 @@ import {
 export default {
   Query: {
     profile: async (_, _args, { req }) => {
-      const authUser = await getUser(req);
-      return authUser;
+      if (!req.userId)
+        throw new UNAUTHORIZED_ERROR('Not authenticated. Please login.');
+      const user = await User.findById(req.userId);
+
+      return user;
     },
     users: async () => {
       try {
@@ -31,55 +33,17 @@ export default {
         throw new SERVER_ERROR(error.message);
       }
     },
-    refreshTokens: async (_, _args, { req }) => {
-      try {
-        const authUser = await getRefreshToken(req);
-        // Issues Authentication Token
-        const tokens = await issueToken(authUser);
-        return {
-          user: authUser,
-          tokens,
-        };
-      } catch (error) {
-        throw new SERVER_ERROR(error.message);
-      }
-    },
+
     logout: async (_, _args, { req }) => {
-      const authUser = await getUser(req, false);
+      if (!req.userId)
+        throw new UNAUTHORIZED_ERROR('Not authenticated. Please login.');
+      const user = await User.findById(req.userId);
       try {
         // Blacklist Authentication Token
-        authUser.tokens.blacklisted = true;
-        await authUser.save();
-
-        return 'Log out success';
-      } catch (error) {
-        throw new SERVER_ERROR(error.message);
-      }
-    },
-    login: async (_, args) => {
-      // Validate user data
-      await UserAuthenticationRules.validate(args, {
-        abortEarly: true,
-      });
-      try {
-        // Check if user is registered
-        const user = await User.findOne({ username: args.username });
-        if (!user) throw new NOT_FOUND_ERROR('User not found.');
-
-        // Compare password
-        const isMatch = await comparePassword(args.password, user.password);
-        if (!isMatch) throw new BAD_REQUEST_ERROR('Invalid password.');
-
-        // Issues Authentication Token
-        const tokens = await issueToken(user);
-
-        user.tokens = tokens;
+        user.tokens.blacklisted = true;
         await user.save();
 
-        return {
-          user,
-          tokens,
-        };
+        return 'Log out success';
       } catch (error) {
         throw new SERVER_ERROR(error.message);
       }
@@ -107,13 +71,54 @@ export default {
         user.password = await hashPassword(password);
 
         // Issues Authentication Token
-        const tokens = await issueToken(user);
+        const tokens = issueToken(user);
 
         user.tokens = tokens;
         const result = await user.save();
 
         return {
           user: result,
+          tokens,
+        };
+      } catch (error) {
+        throw new SERVER_ERROR(error.message);
+      }
+    },
+    refreshTokens: async (_, _args, { req }) => {
+      try {
+        const authUser = getRefreshToken(req);
+        // Issues Authentication Token
+        const tokens = issueToken(authUser);
+        return {
+          user: authUser,
+          tokens,
+        };
+      } catch (error) {
+        throw new SERVER_ERROR(error.message);
+      }
+    },
+    login: async (_, args) => {
+      // Validate user data
+      await UserAuthenticationRules.validate(args, {
+        abortEarly: true,
+      });
+      try {
+        // Check if user is registered
+        const user = await User.findOne({ username: args.username });
+        if (!user) throw new NOT_FOUND_ERROR('User not found.');
+
+        // Compare password
+        const isMatch = await comparePassword(args.password, user.password);
+        if (!isMatch) throw new BAD_REQUEST_ERROR('Invalid password.');
+
+        // Issues Authentication Token
+        const tokens = issueToken(user);
+
+        user.tokens = tokens;
+        await user.save();
+
+        return {
+          user,
           tokens,
         };
       } catch (error) {

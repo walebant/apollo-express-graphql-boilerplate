@@ -4,8 +4,6 @@ export default gql`
   extend type Query {
     profile: User!
     users: [User!]!
-    refreshTokens: Auth!
-    login(username: String!, password: String!): Auth!
     logout: String!
   }
 
@@ -16,6 +14,8 @@ export default gql`
       email: String!
       password: String!
     ): Auth!
+    login(username: String!, password: String!): Auth!
+    refreshTokens: Auth!
   }
 
   type User {
@@ -34,12 +34,7 @@ export default gql`
   }
 
   type AuthTokens {
-    access: Token!
-    refresh: Token!
-  }
-
-  type Token {
-    token: String!
-    expires: String!
+    access: String!
+    refresh: String!
   }
 `;

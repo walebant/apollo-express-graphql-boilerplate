@@ -3,10 +3,20 @@ import cors from 'cors';
 import mongoose from 'mongoose';
 import { error, success } from 'consola';
 import { ApolloServer } from 'apollo-server-express';
-import { PORT, DB_URI, IN_PROD } from './config';
+import { verify } from 'jsonwebtoken';
+import jwtDecode from 'jwt-decode';
+import {
+  PORT,
+  DB_URI,
+  IN_PROD,
+  JWT_ACCESS_SECRET,
+  JWT_REFRESH_SECRET,
+} from './config';
 import typeDefs from './graphql/typeDefs';
 import resolvers from './graphql/resolvers';
-import { getUser } from './functions/auth';
+import { User } from './models';
+
+import { issueToken } from './functions/auth';
 
 // Initialize the app
 const app = express();
@@ -18,7 +28,49 @@ app.use(cors());
 const server = new ApolloServer({
   typeDefs,
   resolvers,
-  context: async ({ req }) => ({ req }),
+  context: async ({ req }) => {
+    // grab tokens from headers
+    const accessToken = req.headers.authorization || '';
+    const refreshToken = req.headers.refresh_token || '';
+
+    let data;
+
+    // verify accessToken is valid and attach userId and role to req object
+    try {
+      data = verify(accessToken, JWT_ACCESS_SECRET);
+      req.userId = data.id;
+      req.userRole = data.role;
+    } catch (error) {}
+
+    // refresh mechanism
+    // verify refreshToken is valid
+    try {
+      data = verify(refreshToken, JWT_REFRESH_SECRET);
+    } catch (error) {}
+    console.log(accessToken);
+    console.log(refreshToken);
+    console.log(data);
+    // if refreshToken is valid
+    // fetch user from database
+    const user = await User.findById(data.id);
+
+    // confirm refresh token from server is not expired
+    const tokenExpiration = jwtDecode(user.tokens.refresh).exp;
+    const currentTime = Date.now().valueOf() / 1000;
+
+    if (tokenExpiration < currentTime) {
+      console.log('expired refresh');
+    } else {
+      console.log(user.id);
+      const tokens = issueToken(user);
+      user.tokens = tokens;
+      await user.save();
+      req.userId = data.id;
+      req.userRole = data.role;
+    }
+
+    return { req };
+  },
   playground: IN_PROD
     ? false
     : {
@@ -37,18 +89,13 @@ const connect = async () => {
       useUnifiedTopology: true,
     });
 
-    server.applyMiddleware({ app, cors: false });
+    server.applyMiddleware({ app });
     app.listen(PORT, () =>
       success({
         badge: true,
         message: `Apollo server started on \nhttp://localhost:/${PORT}${server.graphqlPath}`,
       })
     );
-
-    success({
-      badge: true,
-      message: `Successfully connected to MONGO_DB \n${DB_URI}`,
-    });
   } catch (err) {
     error({
       badge: true,

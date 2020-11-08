@@ -11,32 +11,18 @@ import {
 } from '../config';
 import { User } from '../models';
 
-export const issueToken = async ({ id, name, username, email }) => {
-  const accessToken = await sign(
-    { id, name, username, email },
-    JWT_ACCESS_SECRET,
-    {
-      expiresIn: JWT_ACCESS_EXPIRATION_MINUTES,
-    }
-  );
-  const refreshToken = await sign(
-    { id, name, username, email },
-    JWT_REFRESH_SECRET,
-    {
-      expiresIn: JWT_REFRESH_EXPIRATION_DAYS,
-    }
-  );
+export const issueToken = ({ id, role }) => {
+  const accessToken = sign({ id, role }, JWT_ACCESS_SECRET, {
+    expiresIn: JWT_ACCESS_EXPIRATION_MINUTES,
+  });
 
-  // `Bearer ${token}`;
+  const refreshToken = sign({ id, role }, JWT_REFRESH_SECRET, {
+    expiresIn: JWT_REFRESH_EXPIRATION_DAYS,
+  });
+
   return {
-    access: {
-      token: accessToken,
-      expires: jwtDecode(accessToken).exp,
-    },
-    refresh: {
-      token: refreshToken,
-      expires: jwtDecode(refreshToken).exp,
-    },
+    access: accessToken,
+    refresh: refreshToken,
   };
 };
 
@@ -45,27 +31,6 @@ export const hashPassword = async password =>
 
 export const comparePassword = async (providedPassword, serverPassword) =>
   compare(providedPassword, serverPassword);
-
-export const getUser = async (req, requiresAuth = true) => {
-  const header = req.headers.authorization || '';
-
-  if (header) {
-    const token = verify(header, JWT_ACCESS_SECRET);
-    // try to retrieve a user with the token
-    const authUser = await User.findById(token.id);
-
-    if (!authUser)
-      throw new AuthenticationError(
-        'Invalid token. User authentication failed.'
-      );
-
-    if (requiresAuth) {
-      return authUser;
-    }
-
-    return null;
-  }
-};
 
 export const getRefreshToken = async req => {
   const token = req.headers.refresh_token || '';

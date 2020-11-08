@@ -1,5 +1,4 @@
 import { Schema, model } from 'mongoose';
-import { toJSON, paginate } from './plugins';
 import { roles } from '../config/roles';
 
 const UserSchema = new Schema(
@@ -34,18 +33,14 @@ const UserSchema = new Schema(
       default: 'user',
     },
     tokens: {
-      access: { token: { type: String }, expires: { type: String } },
-      refresh: { token: { type: String }, expires: { type: String } },
+      access: { type: String },
+      refresh: { type: String },
     },
   },
   {
     timestamps: true,
   }
 );
-
-// add plugin that converts mongoose to json
-UserSchema.plugin(toJSON);
-UserSchema.plugin(paginate);
 
 const User = model('User', UserSchema);
 
