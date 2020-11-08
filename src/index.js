@@ -87,7 +87,6 @@ const server = new ApolloServer({
           'request.credentials': 'include',
         },
       },
-  introspection: true,
 });
 
 // Startup ApolloServer
