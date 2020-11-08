@@ -35,21 +35,27 @@ const server = new ApolloServer({
 
     let data;
 
-    // verify accessToken is valid and attach userId and role to req object
+    // verify accessToken is valid and attach userId and role
+    // to req object
     try {
       data = verify(accessToken, JWT_ACCESS_SECRET);
       req.userId = data.id;
       req.userRole = data.role;
     } catch (error) {}
 
-    // refresh mechanism
-    // verify refreshToken is valid
+    // if accessToken is is Expired
+    /*
+      token refresh mechanism
+      verify refreshToken is valid
+      if not return req object
+    */
+
     try {
       data = verify(refreshToken, JWT_REFRESH_SECRET);
-    } catch (error) {}
-    console.log(accessToken);
-    console.log(refreshToken);
-    console.log(data);
+    } catch (error) {
+      return { req };
+    }
+
     // if refreshToken is valid
     // fetch user from database
     const user = await User.findById(data.id);
@@ -57,17 +63,20 @@ const server = new ApolloServer({
     // confirm refresh token from server is not expired
     const tokenExpiration = jwtDecode(user.tokens.refresh).exp;
     const currentTime = Date.now().valueOf() / 1000;
+    const isExpired = tokenExpiration > currentTime;
 
-    if (tokenExpiration < currentTime) {
-      console.log('expired refresh');
-    } else {
-      console.log(user.id);
-      const tokens = issueToken(user);
-      user.tokens = tokens;
-      await user.save();
-      req.userId = data.id;
-      req.userRole = data.role;
-    }
+    // if no user or refresh token is expired
+    if (!user || !isExpired) return { req };
+
+    // proceed to Generate new tokens
+    // if server refresh token is still validate
+    // otherwise user has to re-login
+    console.log('expired tokens, generating new ones');
+    const tokens = issueToken(user);
+    user.tokens = tokens;
+    await user.save();
+    req.userId = data.id;
+    req.userRole = data.role;
 
     return { req };
   },

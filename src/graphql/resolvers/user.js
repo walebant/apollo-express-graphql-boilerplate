@@ -3,7 +3,6 @@ import {
   issueToken,
   hashPassword,
   comparePassword,
-  getRefreshToken,
 } from '../../functions/auth';
 import {
   UserRegisterationRules,
@@ -78,19 +77,6 @@ export default {
 
         return {
           user: result,
-          tokens,
-        };
-      } catch (error) {
-        throw new SERVER_ERROR(error.message);
-      }
-    },
-    refreshTokens: async (_, _args, { req }) => {
-      try {
-        const authUser = getRefreshToken(req);
-        // Issues Authentication Token
-        const tokens = issueToken(authUser);
-        return {
-          user: authUser,
           tokens,
         };
       } catch (error) {
