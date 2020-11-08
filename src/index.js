@@ -3,8 +3,7 @@ import cors from 'cors';
 import mongoose from 'mongoose';
 import { error, success } from 'consola';
 import { ApolloServer } from 'apollo-server-express';
-import { verify } from 'jsonwebtoken';
-import jwtDecode from 'jwt-decode';
+import { verify, decode } from 'jsonwebtoken';
 import {
   PORT,
   DB_URI,
@@ -61,7 +60,7 @@ const server = new ApolloServer({
     const user = await User.findById(data.id);
 
     // confirm refresh token from server is not expired
-    const tokenExpiration = jwtDecode(user.tokens.refresh).exp;
+    const tokenExpiration = decode(user.tokens.refresh).exp;
     const currentTime = Date.now().valueOf() / 1000;
     const isExpired = tokenExpiration > currentTime;
 
