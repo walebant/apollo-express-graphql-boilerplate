@@ -13,4 +13,11 @@ export const {
   IN_PROD = NODE_ENV === 'production',
 } = parsed;
 
-// export const PORT =
+export const email = {
+  smtp: {
+    host: parsed.SMTP_HOST,
+    port: parsed.SMTP_PORT,
+    auth: { user: parsed.SMTP_USERNAME, pass: parsed.SMTP_PASSWORD },
+  },
+  from: parsed.EMAIL_FROM,
+};
