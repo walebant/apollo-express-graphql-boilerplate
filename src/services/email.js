@@ -15,13 +15,6 @@ if (!IN_PROD) {
     );
 }
 
-/**
- * Send an email
- * @param {string} to
- * @param {string} subject
- * @param {string} text
- * @returns {Promise}
- */
 export const sendEmail = async (to, subject, text) => {
   const msg = { from: email.from, to, subject, text };
   await transport.sendMail(msg);
