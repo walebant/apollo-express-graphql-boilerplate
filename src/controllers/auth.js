@@ -7,7 +7,7 @@ import {
   UNAUTHORIZED_ERROR,
   SERVER_ERROR,
 } from '../utils/errors';
-// import { sendEmail } from '../services';
+import { sendVerificationEmail } from '../services';
 
 export const authController = {
   profile: async (_, _args, { req }) => {
@@ -67,11 +67,7 @@ export const authController = {
       const result = await user.save();
 
       // send verification email
-      await sendEmail(
-        user.email,
-        'Verify your account',
-        'Please verify your account using this link'
-      );
+      await sendVerificationEmail(user.email, issueToken(user, 'email'));
 
       return {
         user: result,

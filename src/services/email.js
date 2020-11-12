@@ -36,3 +36,12 @@ export const sendResetPasswordEmail = async (to, token) => {
   If you did not request any password resets, then ignore this email.`;
   await sendEmail(to, subject, text);
 };
+
+export const sendVerificationEmail = async (to, token) => {
+  const subject = 'Verify Your Account';
+  const link = `http://link-to-app/reset-password?token=${token}`;
+  const text = `Dear user,
+  To verify your account, please click on this link: ${link}
+  If you did not create an account, then ignore this email.`;
+  await sendEmail(to, subject, text);
+};

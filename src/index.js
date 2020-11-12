@@ -40,7 +40,9 @@ const server = new ApolloServer({
       data = verify(accessToken, JWT_ACCESS_SECRET);
       req.userId = data.id;
       req.userRole = data.role;
-    } catch (error) {}
+    } catch (error) {
+      return { req };
+    }
 
     // if accessToken is is Expired
     /*
@@ -97,6 +99,7 @@ const connect = async () => {
     });
 
     server.applyMiddleware({ app });
+
     app.listen(PORT, () =>
       success({
         badge: true,

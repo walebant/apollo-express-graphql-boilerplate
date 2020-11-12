@@ -9,10 +9,14 @@ import {
   JWT_REFRESH_EXPIRATION_DAYS,
 } from '../config';
 
-export const issueToken = ({ id, role }) => {
+export const issueToken = ({ id, role }, type = 'auth') => {
   const accessToken = sign({ id, role }, JWT_ACCESS_SECRET, {
     expiresIn: JWT_ACCESS_EXPIRATION_MINUTES,
   });
+
+  // no need to generate refresh token if
+  // the token is needed for email verification
+  if (type === 'email') return accessToken;
 
   const refreshToken = sign({ id, role }, JWT_REFRESH_SECRET, {
     expiresIn: JWT_REFRESH_EXPIRATION_DAYS,

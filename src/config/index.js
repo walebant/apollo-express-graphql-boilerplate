@@ -17,6 +17,7 @@ export const email = {
   smtp: {
     host: parsed.SMTP_HOST,
     port: parsed.SMTP_PORT,
+    secure: false,
     auth: { user: parsed.SMTP_USERNAME, pass: parsed.SMTP_PASSWORD },
   },
   from: parsed.EMAIL_FROM,
