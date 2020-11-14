@@ -16,8 +16,9 @@ if (!IN_PROD) {
 }
 
 export const sendEmail = async (to, subject, text) => {
-  const msg = { from: email.from, to, subject, text };
+  const msg = { from: 'mad@gmail.com', to, subject, text };
   await transport.sendMail(msg);
+  // console.log(222);
 };
 
 export const sendResetPasswordEmail = async (to, token) => {

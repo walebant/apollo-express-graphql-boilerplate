@@ -7,7 +7,7 @@ import {
   UNAUTHORIZED_ERROR,
   SERVER_ERROR,
 } from '../utils/errors';
-import { sendVerificationEmail } from '../services';
+import { sendVerificationEmail, sendEmail } from '../services';
 
 export const authController = {
   profile: async (_, _args, { req }) => {
@@ -51,8 +51,8 @@ export const authController = {
     try {
       let user;
       // Check if user is already registered
-      user = await User.findOne({ username });
-      if (user) throw new BAD_REQUEST_ERROR('Username is already taken.');
+      // user = await User.findOne({ username });
+      // if (user) throw new BAD_REQUEST_ERROR('Username is already taken.');
       user = await User.findOne({ email });
       if (user) throw new BAD_REQUEST_ERROR('Email is already taken.');
 
