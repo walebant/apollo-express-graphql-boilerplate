@@ -7,6 +7,7 @@ import {
   JWT_REFRESH_SECRET,
   JWT_ACCESS_EXPIRATION_MINUTES,
   JWT_REFRESH_EXPIRATION_DAYS,
+  JWT_RESET_PASSWORD_EXPIRATION,
 } from '../config';
 
 export const issueToken = ({ id, role }, type = 'auth') => {
@@ -26,6 +27,14 @@ export const issueToken = ({ id, role }, type = 'auth') => {
     access: accessToken,
     refresh: refreshToken,
   };
+};
+
+export const resetPasswordToken = ({ id, role }) => {
+  const resetToken = sign({ id, role }, JWT_ACCESS_SECRET, {
+    expiresIn: JWT_RESET_PASSWORD_EXPIRATION,
+  });
+
+  return resetToken;
 };
 
 export const hashPassword = async password =>

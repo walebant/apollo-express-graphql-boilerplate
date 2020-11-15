@@ -16,6 +16,7 @@ export default gql`
     ): Auth!
     login(username: String!, password: String!): Auth!
     invalidateTokens: String!
+    resetPassword: String!
   }
 
   type User {

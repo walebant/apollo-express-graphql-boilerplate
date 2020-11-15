@@ -1,5 +1,10 @@
 import { User } from '../models';
-import { issueToken, hashPassword, comparePassword } from '../functions/auth';
+import {
+  issueToken,
+  resetPasswordToken,
+  hashPassword,
+  comparePassword,
+} from '../functions/auth';
 import { UserRegisterationRules, UserAuthenticationRules } from '../validators';
 import {
   NOT_FOUND_ERROR,
@@ -7,7 +12,11 @@ import {
   UNAUTHORIZED_ERROR,
   SERVER_ERROR,
 } from '../utils/errors';
-import { sendVerificationEmail, sendEmail } from '../services';
+import {
+  sendVerificationEmail,
+  sendResetPasswordEmail,
+  sendEmail,
+} from '../services';
 
 export const authController = {
   profile: async (_, _args, { req }) => {
@@ -118,5 +127,36 @@ export const authController = {
       // throw new ApolloError()
     }
   },
-  resetPasswordUrl: async (_, _args, { req }) => {},
+  resetPassword: async (_, args, { req }) => {
+    await UserAuthenticationRules.validate(args, {
+      abortEarly: true,
+    });
+
+    try {
+      // Check if user is registered
+      let user;
+
+      if (args.username) {
+        user = await User.findOne({ username: args.username });
+        if (!user) throw new NOT_FOUND_ERROR('User not found.');
+      }
+
+      if (args.email) {
+        user = await User.findOne({ email: args.email });
+        if (!user) throw new NOT_FOUND_ERROR('User not found.');
+      }
+
+      // Issues Authentication Token
+      const token = resetPasswordToken(user);
+      sendResetPasswordEmail(args.email, token);
+
+      user.tokens.access = '';
+      user.tokens.refresh = '';
+      await user.save();
+
+      return 'Please check your email to continue your password reset.';
+    } catch (error) {
+      throw new SERVER_ERROR(error.message);
+    }
+  },
 };

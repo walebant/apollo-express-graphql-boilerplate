@@ -32,6 +32,8 @@ const tokens = yup.object({
   refresh: yup.string(),
 });
 
+const usernameOrEmail = yup.mixed().oneOf([username, email]);
+
 export const UserRegisterationRules = yup.object().shape({
   name,
   username,
@@ -42,6 +44,6 @@ export const UserRegisterationRules = yup.object().shape({
 });
 
 export const UserAuthenticationRules = yup.object().shape({
-  username,
+  usernameOrEmail,
   password,
 });
