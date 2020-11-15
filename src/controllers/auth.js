@@ -33,7 +33,8 @@ export const authController = {
     const user = await User.findById(req.userId);
     try {
       // Blacklist Authentication Token
-      user.tokens.blacklisted = true;
+      user.tokens.access = '';
+      user.tokens.refresh = '';
       await user.save();
 
       return 'Log out success';
