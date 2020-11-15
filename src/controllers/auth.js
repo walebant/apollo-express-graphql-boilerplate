@@ -27,6 +27,7 @@ export const authController = {
   },
 
   logout: async (_, _args, { req }) => {
+    // invalidate token on server
     if (!req.userId)
       throw new UNAUTHORIZED_ERROR('Not authenticated. Please login.');
     const user = await User.findById(req.userId);
@@ -116,4 +117,5 @@ export const authController = {
       // throw new ApolloError()
     }
   },
+  resetPasswordUrl: async (_, _args, { req }) => {},
 };

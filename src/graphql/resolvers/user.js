@@ -4,11 +4,11 @@ export default {
   Query: {
     profile: authController.profile,
     users: authController.users,
-    logout: authController.logout,
   },
   Mutation: {
     register: authController.register,
     login: authController.login,
+    logout: authController.logout,
     invalidateTokens: authController.invalidateTokens,
   },
 };
